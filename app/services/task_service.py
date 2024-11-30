@@ -10,6 +10,13 @@ from app.services.statistics_service import StatisticsService
 class TaskService:
 
     @staticmethod
+    def get_total_task_count(db: Session) -> int:
+        """
+        Get the total count of non-deleted tasks
+        """
+        return db.query(Task).filter(Task.is_deleted == False).count()
+
+    @staticmethod
     def get_tasks(db: Session, page: int = 1, limit: int = 10):
         return db.query(Task).filter(Task.is_deleted == False).offset((page - 1) * limit).limit(limit).all()
 
