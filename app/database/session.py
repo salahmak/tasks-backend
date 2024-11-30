@@ -1,15 +1,22 @@
+from dotenv.main import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool
 import os
 
+
+load_dotenv()
+
 # Get database connection details from environment variables
 DATABASE_URL = (
-    f"mysql+pymysql://{os.getenv('DB_USER', 'user')}:"
-    f"{os.getenv('DB_PASSWORD', 'password')}@"
+    f"mysql+pymysql://{os.getenv('MYSQL_USER', 'user')}:"
+    f"{os.getenv('MYSQL_PASSWORD', 'password')}@"
     f"{os.getenv('DB_HOST', 'localhost')}/"
-    f"{os.getenv('DB_NAME', 'mydb')}"
+    f"{os.getenv('MYSQL_DATABASE', 'mydb')}"
 )
+
+
+print(DATABASE_URL)
 
 # Create engine with connection pooling disabled for better performance in async contexts
 engine = create_engine(
