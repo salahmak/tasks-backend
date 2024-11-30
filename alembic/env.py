@@ -1,9 +1,20 @@
 from logging.config import fileConfig
+import os
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
+
+from dotenv import load_dotenv
+
+from app.database.base import Base
+
+from app.models.task_model import Task
+from app.models.task_statistics_model import TaskStatistic
+
+
+load_dotenv()
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -14,11 +25,24 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
+# Set the SQLAlchemy URL dynamically from environment variables
+db_url = (
+    f"mysql+pymysql://{os.getenv('MYSQL_USER', 'user')}:"
+    f"{os.getenv('MYSQL_PASSWORD', 'password')}@"
+    f"{os.getenv('DB_HOST', 'localhost')}/"
+    f"{os.getenv('MYSQL_DATABASE', 'mydb')}"
+)
+
+print(db_url)
+
+# Override the sqlalchemy.url in the alembic.ini
+config.set_main_option('sqlalchemy.url', db_url)
+
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = None
+target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -65,7 +89,7 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection, target_metadata=target_metadata,
         )
 
         with context.begin_transaction():
