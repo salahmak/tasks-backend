@@ -24,7 +24,7 @@ class ErrorCode(str, Enum):
 class ErrorResponse(BaseModel):
     code: ErrorCode
     message: str
-    details: Optional[dict] = None
+    details: Optional[List[object]] = None
 
 # Generic Response Model
 class APIResponse(BaseModel, Generic[T]):
@@ -61,7 +61,7 @@ def create_success_response(
 def create_error_response(
     code: ErrorCode,
     message: str,
-    details: Optional[dict] = None
+    details: Optional[List[object]] = None
 ) -> APIResponse[object]:
     return APIResponse(
         success=False,
