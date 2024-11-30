@@ -1,3 +1,4 @@
+from typing_extensions import List
 from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional
@@ -17,6 +18,9 @@ class TaskUpdate(TaskBase):
     description: Optional[str] = None
     is_deleted: Optional[bool] = Field(False, description="Mark task as deleted")
     status: Optional[TaskStatusEnum] = Field(None, description="Update task status")
+
+class TasksBulkAction(BaseModel):
+    task_ids: List[int] = Field(..., min_length=1, description="List of task IDs to be acted upon")
 
 class TaskSchema(TaskBase):
     id: int

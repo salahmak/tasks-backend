@@ -19,7 +19,7 @@ class Task(Base):
 
     title = Column(String(255), index=True, nullable=False)
     description = Column(Text, nullable=True)
-    status = Column(SqlEnum(TaskStatusEnum), default=TaskStatusEnum.pending)
+    status: Mapped[TaskStatusEnum] = mapped_column(SqlEnum(TaskStatusEnum), default=TaskStatusEnum.pending)
 
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())

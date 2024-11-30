@@ -1,7 +1,8 @@
 from typing import Optional
+from typing_extensions import List
 from sqlalchemy.orm.session import Session
 
-from app.models.task_model import Task
+from app.models.task_model import Task, TaskStatusEnum
 from app.models.task_statistics_model import TaskActionEnum, TaskStatistic
 from app.schemas.task_schema import TaskCreate, TaskUpdate
 from app.services.statistics_service import StatisticsService
@@ -74,3 +75,77 @@ class TaskService:
         db.commit()
 
         return True
+
+    @staticmethod
+    def bulk_delete_tasks(db: Session, task_ids: List[int]) -> List[int]:
+        """
+        Perform bulk soft delete of tasks
+
+        Args:
+            db (Session): Database session
+            task_ids (List[int]): List of task IDs to delete
+
+        Returns:
+            List[int]: List of successfully deleted task IDs
+        """
+
+        # Find existing, non-deleted tasks
+        existing_tasks = db.query(Task).filter(
+            Task.id.in_(task_ids),
+            Task.is_deleted == False
+        ).all()
+
+        # Track successfully deleted task IDs
+        deleted_task_ids: list[int] = []
+
+        # Soft delete tasks and log statistics for each
+        for task in existing_tasks:
+            task.is_deleted = True
+
+            # Log deletion action
+            StatisticsService.log_action(db, task.id, TaskActionEnum.deleted)
+
+            deleted_task_ids.append(task.id)
+
+        # Commit changes if we have any deletions
+        if deleted_task_ids:
+            db.commit()
+
+        return deleted_task_ids
+
+    @staticmethod
+    def bulk_complete_tasks(db: Session, task_ids: List[int]) -> List[int]:
+        """
+        Perform bulk marking of tasks as complete
+
+        Args:
+            db (Session): Database session
+            task_ids (List[int]): List of task IDs to mark complete
+
+        Returns:
+            List[int]: List of successfully completed task IDs
+        """
+        # Find existing, non-deleted tasks that are not already completed
+        existing_tasks = db.query(Task).filter(
+            Task.id.in_(task_ids),
+            Task.is_deleted == False,
+            Task.status != TaskStatusEnum.completed
+        ).all()
+
+        # Track successfully completed task IDs
+        completed_task_ids: list[int] = []
+
+        # Mark tasks as complete and log statistics for each
+        for task in existing_tasks:
+            task.status = TaskStatusEnum.completed
+
+            # Log modification action
+            StatisticsService.log_action(db, task.id, TaskActionEnum.modified)
+
+            completed_task_ids.append(task.id)
+
+        # Commit changes if we have any completions
+        if completed_task_ids:
+            db.commit()
+
+        return completed_task_ids
