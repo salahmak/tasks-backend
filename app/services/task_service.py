@@ -4,7 +4,7 @@ from sqlalchemy.orm.session import Session
 
 from app.models.task_model import Task, TaskStatusEnum
 from app.models.task_statistics_model import TaskActionEnum, TaskStatistic
-from app.schemas.task_schema import TaskCreate, TaskUpdate
+from app.schemas.task_schema import TaskCreate, TaskSortingModeEnum, TaskUpdate
 from app.services.statistics_service import StatisticsService
 
 
@@ -18,8 +18,10 @@ class TaskService:
         return db.query(Task).filter(Task.is_deleted == False).count()
 
     @staticmethod
-    def get_tasks(db: Session, page: int = 1, limit: int = 10):
-        return db.query(Task).filter(Task.is_deleted == False).offset((page - 1) * limit).limit(limit).all()
+    def get_tasks(db: Session, page: int = 1, limit: int = 10, order: TaskSortingModeEnum = TaskSortingModeEnum.desc):
+        order_by = Task.id.asc() if order == TaskSortingModeEnum.asc else Task.id.desc()
+
+        return db.query(Task).filter(Task.is_deleted == False).order_by(order_by).offset((page - 1) * limit).limit(limit).all()
 
 
     @staticmethod

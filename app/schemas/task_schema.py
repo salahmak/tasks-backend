@@ -1,9 +1,14 @@
+from enum import Enum
 from typing_extensions import List
 from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional
 
 from app.models.task_model import TaskStatusEnum
+
+class TaskSortingModeEnum(str, Enum):
+    asc = "asc"
+    desc = "desc"
 
 class TaskBase(BaseModel):
     title: str = Field(..., min_length=1, max_length=255, description="Task title")

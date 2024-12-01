@@ -6,7 +6,7 @@ from sqlalchemy.orm.session import Session
 
 from app.database.session import get_db
 from app.schemas.reponse_schemas import APIResponse, ErrorCode, PaginationMetadata, TaskResponseSchema, create_error_response, create_success_response
-from app.schemas.task_schema import TaskCreate, TaskSchema, TaskUpdate, TasksBulkAction
+from app.schemas.task_schema import TaskCreate, TaskSchema, TaskSortingModeEnum, TaskUpdate, TasksBulkAction
 from app.services.task_service import TaskService
 
 router = APIRouter()
@@ -29,13 +29,14 @@ def create_task(task: TaskCreate, db: Session = cast(Session, Depends(get_db))):
 def list_tasks(
     db: Session = cast(Session, Depends(get_db)),
     page: int = 1,
-    limit: int = 10
+    limit: int = 10,
+    order: TaskSortingModeEnum = TaskSortingModeEnum.desc
 ):
     try:
         # Get total count for pagination
         total_tasks = TaskService.get_total_task_count(db)
 
-        tasks = TaskService.get_tasks(db, page, limit)
+        tasks = TaskService.get_tasks(db, page, limit, order)
 
         # Convert to response schema
         task_responses = [TaskResponseSchema.model_validate(task) for task in tasks]

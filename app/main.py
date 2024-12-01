@@ -4,12 +4,19 @@ from starlette.responses import JSONResponse
 from app.routes import task_routes
 from app.routes import stats_routes
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 
-from app.schemas.reponse_schemas import APIResponse, ErrorCode, create_error_response
+from app.schemas.reponse_schemas import ErrorCode, create_error_response
 
 # Initialize FastAPI app
 app = FastAPI(title="Task Management API server")
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Include routers
 app.include_router(task_routes.router, prefix="/api/v1", tags=["tasks"])
