@@ -28,7 +28,7 @@ class TaskService:
     def create_task(db: Session, task: TaskCreate) -> Task:
 
         # create the new task and add it to the database
-        db_task = Task(title=task.title, description=task.description)
+        db_task = Task(title=task.title, description=task.description, status=task.status)
         db.add(db_task)
         db.commit()
         db.refresh(db_task)
