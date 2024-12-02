@@ -23,6 +23,10 @@ class TaskService:
 
         return db.query(Task).filter(Task.is_deleted == False).order_by(order_by).offset((page - 1) * limit).limit(limit).all()
 
+    @staticmethod
+    def get_task_by_id(db: Session, task_id: int):
+        return db.query(Task).filter(Task.id == task_id).first()
+
 
     @staticmethod
     def create_task(db: Session, task: TaskCreate) -> Task:

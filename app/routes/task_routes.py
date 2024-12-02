@@ -61,6 +61,26 @@ def list_tasks(
             message=f"Failed to retrieve tasks: {str(e)}"
         )
 
+@router.get("/tasks/{task_id}", response_model=APIResponse[TaskResponseSchema])
+def get_task(task_id: int, db: Session = cast(Session, Depends(get_db))):
+    try:
+        task = TaskService.get_task_by_id(db, task_id)
+
+        if not task:
+            return create_error_response(
+                code=ErrorCode.NOT_FOUND,
+                message=f"Task with ID {task_id} not found"
+            )
+
+        return create_success_response(
+            data=TaskResponseSchema.model_validate(task)
+        )
+    except Exception as e:
+        return create_error_response(
+            code=ErrorCode.INTERNAL_SERVER_ERROR,
+            message=f"Failed to retrieve task: {str(e)}"
+        )
+
 @router.put("/tasks/{task_id}", response_model=APIResponse[TaskResponseSchema])
 def update_task(
     task_id: int,
